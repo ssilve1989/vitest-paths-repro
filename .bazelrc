@@ -1,0 +1,97 @@
+# Enable the disk cache.
+build --disk_cache=.bazel-cache/disk
+common --repository_cache=.bazel-cache/repo
+
+build --incompatible_enable_cc_toolchain_resolution
+
+# Use the CC toolchain from nixpkgs
+build --crosstool_top=@nixpkgs_config_cc//:toolchain
+
+# Limit workers
+# https://docs.bazel.build/versions/master/command-line-reference.html#flag--worker_max_instances
+# https://opensourcelive.withgoogle.com/events/bazelcon2020?talk=day1-talk4
+build --worker_max_instances=1
+
+# Enable Scala worker
+build --strategy=Scalac=worker
+
+# Java 11
+# See https://github.com/bazelbuild/bazel/issues/7849 for more details on bazel 5 changes.
+# required by bazel 5+ for grpc-java, rules_scala
+common --incompatible_java_common_parameters=false
+build --java_language_version=11
+build --tool_java_language_version=11
+build --java_runtime_version=remotejdk_11
+build --tool_java_runtime_version=remotejdk_11
+
+# Prevent TS worker from trying to expand the `includes` section in tsconfig.json.
+# It would find the "test/*.ts" reference when compiling //src:src, and the FileCache will then error
+# when TS attempts to read one of these files that doesn't belong in the compilation.
+build --worker_sandboxing
+
+build --test_env=FORCE_COLOR=1 # see `man node` and https://github.com/chalk/chalk
+test --test_output=errors
+test --test_summary=terse
+
+# These are defined on build to prevent cache invalidation
+build --test_env=AUDIT_LOGGER_HOST=localhost
+build --test_env=AUDIT_LOGGER_MODE=console
+
+coverage --combined_report=lcov
+coverage --test_tag_filters -no-coverage # Ignore tests with the no-coverage flag when doing code coverage
+
+# # enable a feature of the jacocorunner, see https://github.com/stackb/bazel-jacocorunner/pull/7
+coverage --test_env=JACOCO_REMAP_SRC_TEST_PATHS=1
+
+# Don't have duplicate symlinks in runfiles in order to speedup Bazel builds
+build --nolegacy_external_runfiles
+
+# Enable remote cache.
+# Requires VPN, but Bazel will continue without remote cache without VPN.
+# build --remote_cache=http://bazel-cache.omnistac.internal:8080
+
+# see https://github.com/bazelbuild/bazel/issues/6038#issuecomment-623891414
+common --experimental_allow_tags_propagation
+
+# Make the remote cache read only
+build --remote_upload_local_results=false
+
+# Allow writes to local disk cache
+build --incompatible_remote_results_ignore_disk=true
+
+# Don't expose the PATH to actions
+build --incompatible_strict_action_env
+
+# Override the default compiler (@com_google_protobuf//:protoc) that is used by
+# proto_library and other native proto rules.  Will be enabled once
+# gazelle proto generation is enabled.
+#build --proto_compiler=//thirdparty/stackb/rules_proto:protoc.exe
+
+# Keep this at the end to allow the user config to override all options
+try-import %workspace%/.bazelrc.user
+
+# scalapb doesn't like this _virtual_imports directory (it crashes with "Exit with code 1")
+# and we don't seem to be needing it
+# https://github.com/bazelbuild/bazel/issues/9215
+build --noincompatible_generated_protos_in_virtual_imports
+
+test:debug --test_output=streamed --test_strategy=exclusive --test_timeout=9999 --nocache_test_results --define=VERBOSE_LOGS=1
+# Use bazel run with `--config=debug` to turn on the NodeJS inspector agent.
+# The node process will break before user code starts and wait for the debugger to connect.
+run:debug --define=VERBOSE_LOGS=1 -- --node_options=--inspect-brk
+# The following option will change the build output of certain rules such as terser and may not be desirable in all cases
+build:debug --compilation_mode=dbg
+
+# Run scalafix either by `bazel run --//bazel_tools/scala/scalafix:enable=true [TARGET]`
+# or `bazel run --config=scalafix [TARGET]`
+run:scalafix --//bazel_tools/scala/scalafix:enable=true
+
+# Sets the cucumber-feature-paths config value to yes which will expect
+# that the user now provides a feature glob to run for a cucumber target
+# example: bazel test --config=cucumber-feature-paths //path/to/targets --test_arg="GLOB|FILE|DIR|PATH"
+# if you are using a widespread glob, make sure to prefix `trumid` to the glob
+test:cucumber-feature-paths --define="cucumber_feature_paths=yes"
+
+# honor the setting of `skipLibCheck` in the tsconfig.json file
+build --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig
+fetch --@aspect_rules_ts//ts:skipLibCheck=honor_tsconfig

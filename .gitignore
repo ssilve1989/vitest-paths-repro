@@ -1,0 +1,8 @@
+**/node_modules
+
+# Bazel
+bazel-*
+.bazelrc.user
+.bazel-cache
+
+.vscode
