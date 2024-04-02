@@ -1,0 +1,35 @@
+load("//bazel_tools:node/index.bzl", "ts_project")
+load("//bazel_tools:node/testing.bzl", "ts_test")
+
+package(default_visibility = [
+    "//trumid:__subpackages__",
+])
+
+ts_project(
+    name = "rxjs",
+    srcs = glob(
+        ["**/*.ts"],
+        exclude = [
+            "**/*.spec.ts",
+        ],
+    ),
+    deps = [
+        "//:node_modules/immutable",
+        "//:node_modules/lodash",
+        "//:node_modules/rxjs",
+        "//:node_modules/utility-types",
+        "//trumid/common/utils/collection/node",
+    ],
+)
+
+ts_test(
+    name = "tests",
+    srcs = glob([
+        "**/*.spec.ts",
+    ]),
+    deps = [
+        ":rxjs",
+        "//:node_modules/@types/lodash",
+        "//:node_modules/rxjs-marbles",
+    ],
+)

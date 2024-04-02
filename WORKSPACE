@@ -2,7 +2,7 @@ workspace(name = "unity")
 
 SKYLIB_VERSION = "1.2.1"
 
-NODE_VERSION = "20.11.1"
+NODE_VERSION = "20.6.1"
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 

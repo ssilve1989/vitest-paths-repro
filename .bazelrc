@@ -4,9 +4,6 @@ common --repository_cache=.bazel-cache/repo
 
 build --incompatible_enable_cc_toolchain_resolution
 
-# Use the CC toolchain from nixpkgs
-build --crosstool_top=@nixpkgs_config_cc//:toolchain
-
 # Limit workers
 # https://docs.bazel.build/versions/master/command-line-reference.html#flag--worker_max_instances
 # https://opensourcelive.withgoogle.com/events/bazelcon2020?talk=day1-talk4

@@ -1,4 +1,8 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+npm_link_all_packages(name = "node_modules")
 
 ts_config(
     name = "tsconfig",
@@ -6,16 +10,16 @@ ts_config(
     visibility = ["//visibility:public"],
 )
 
-# js_library(
-#     name = "vitest_config",
-#     testonly = True,
-#     srcs = ["vitest.config.mjs"],
-#     visibility = ["//visibility:public"],
-#     deps = [
-#         "//:node_modules/@vitest/coverage-istanbul",
-#         "//:node_modules/unplugin-swc",
-#         "//:node_modules/vite",
-#         "//:node_modules/vite-tsconfig-paths",
-#         "//:node_modules/vitest",
-#     ],
-# )
+js_library(
+    name = "vitest_config",
+    testonly = True,
+    srcs = ["vitest.config.mjs"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:node_modules/@vitest/coverage-istanbul",
+        "//:node_modules/unplugin-swc",
+        "//:node_modules/vite",
+        "//:node_modules/vite-tsconfig-paths",
+        "//:node_modules/vitest",
+    ],
+)
