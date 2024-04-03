@@ -1,5 +1,7 @@
 import { marbles } from 'rxjs-marbles';
-import { pairwiseWith } from './pairwise-with';
+// this import, which makes the index and all of its dependencies valuated is what causes the problem
+// if the import was a direct import reference the problem does not occur
+import { pairwiseWith } from '..'; 
 
 describe('pairwiseWith', () => {
   it(
