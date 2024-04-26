@@ -1,20 +1,47 @@
-load("@//bazel_tools:node/unity_js_test.bzl", "unity_js_test")
-load("@aspect_bazel_lib//lib:directory_path.bzl", _directory_path = "directory_path")
+"""vitest macro"""
 
-def _vitest_test_internal(name, link_root_name, **kwargs):
-    store_target_name = ".aspect_rules_js/{}/vitest@1.3.1".format(link_root_name)
-    _directory_path(
-        name = "%s__entry_point" % name,
-        directory = "@//:{}/dir".format(store_target_name),
-        path = "./vitest.mjs",
-        tags = ["manual"],
-    )
-    unity_js_test(
+load("@npm//:vitest/package_json.bzl", vitest_bin = "bin")
+
+DEPS = [
+    "@unity//:vitest_config",
+    "@unity//:tsconfig",
+    # implicitly include vitest helpers as most all tests will need it
+    # and its a temporary include until the npm package publishes it and we can remove it here
+    "//trumid/common/testing/vitest",
+]
+
+def vitest_test(name, srcs = [], **kwargs):
+    """
+    Run a test using vitest
+
+    Args:
+        name: name of the test target
+        srcs: list of source files
+        **kwargs: additional arguments to pass to vitest_test
+    """
+    deps = kwargs.pop("deps", [])
+    data = kwargs.pop("data", [])
+    tags = kwargs.pop("tags", [])
+
+    deduped_deps = depset(deps + DEPS).to_list()
+
+    vitest_bin.vitest_test(
         name = name,
-        entry_point = ":%s__entry_point" % name,
-        data = kwargs.pop("data", []) + ["@//:{}".format(store_target_name)],
+        args = [
+            "run",
+            "--reporter=default",
+            "--color",
+            "--update=false",
+            "--config=$(location //:vitest_config)",
+        ],
+        data = data + srcs + deduped_deps,
+        env = {
+            "BAZEL": "1",
+            "CI": "1",
+        },
+        patch_node_fs = True,
+        # data = srcs + deduped_deps + data,
+        tags = tags + ["vite"],
+        timeout = "short",
         **kwargs
     )
-
-def vitest_test(name, **kwargs):
-    _vitest_test_internal(name, "node_modules", **kwargs)

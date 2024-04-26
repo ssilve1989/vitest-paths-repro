@@ -21,27 +21,11 @@ def ts_test(name, srcs = [], **kwargs):
     """
     deps = kwargs.pop("deps", [])
     data = kwargs.pop("data", [])
-    tags = kwargs.pop("tags", [])
 
     deduped_deps = depset(deps + DEPS).to_list()
 
     vitest_test(
         name = name,
-        args = [
-            "run",
-            "--reporter=default",
-            "--color",
-            "--update=false",
-            "--config=$(location //:vitest_config)",
-        ],
         data = data + srcs + deduped_deps,
-        env = {
-            "BAZEL": "1",
-            "CI": "1",
-        },
-        patch_node_fs = True,
-        # data = srcs + deduped_deps + data,
-        tags = tags + ["vite"],
-        timeout = "short",
         **kwargs
     )

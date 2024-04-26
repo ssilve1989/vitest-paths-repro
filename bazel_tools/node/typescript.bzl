@@ -18,6 +18,11 @@ def ts_project(name, **kwargs):
     resolve_json_module = kwargs.pop("resolve_json_module", True)
     deps = kwargs.pop("deps", [])
 
+    native.filegroup(
+        name = "%s_srcs" % name,
+        srcs = srcs,
+    )
+
     _ts_project(
         name = name,
         srcs = srcs,

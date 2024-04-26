@@ -1,5 +1,5 @@
 load("//bazel_tools:node/index.bzl", "ts_project")
-load("//bazel_tools:node/testing.bzl", "ts_test")
+load("//bazel_tools:node/vitest_test.bzl", "vitest_test")
 
 package(default_visibility = [
     "//trumid:__subpackages__",
@@ -22,7 +22,7 @@ ts_project(
     ],
 )
 
-ts_test(
+vitest_test(
     name = "tests",
     srcs = glob([
         "**/*.spec.ts",
