@@ -1,11 +1,12 @@
 {
-  "name": "vitest-paths-repro",
+  "name": "unity-",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "bazel": "bazelisk"
   },
+  "packageManager": "pnpm@8.15.0",
   "keywords": [],
   "author": "",
   "license": "ISC",
