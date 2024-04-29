@@ -19,8 +19,8 @@ def ts_project(name, **kwargs):
     deps = kwargs.pop("deps", [])
 
     native.filegroup(
-        name = "%s_srcs" % name,
-        srcs = srcs,
+        name = "%s.srcs" % name,
+        srcs = srcs + deps,
     )
 
     _ts_project(

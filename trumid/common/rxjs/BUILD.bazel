@@ -28,8 +28,9 @@ vitest_test(
         "**/*.spec.ts",
     ]),
     deps = [
-        ":rxjs",
+        ":rxjs.srcs",
         "//:node_modules/@types/lodash",
+        "//:node_modules/rxjs",
         "//:node_modules/rxjs-marbles",
     ],
 )
